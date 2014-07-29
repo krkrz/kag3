@@ -111,45 +111,11 @@ class KAGWaveSoundBuffer extends WaveSoundBuffer, KAGSoundBuffer
     }
 }
 
-class KAGMIDISoundBuffer extends MIDISoundBuffer, KAGSoundBuffer
-{
-	function KAGMIDISoundBuffer(owner)
-	{
-		MIDISoundBuffer(owner);
-		KAGSoundBuffer(owner, global.MIDISoundBuffer);
-	}
-
-	function finalize()
-	{
-		global.KAGSoundBuffer.finalize(...);
-		global.MIDISoundBuffer.finalize(...);
-	}
-}
-
-class KAGCDDASoundBuffer extends CDDASoundBuffer, KAGSoundBuffer
-{
-	function KAGCDDASoundBuffer(owner)
-	{
-		CDDASoundBuffer(owner);
-		KAGSoundBuffer(owner, global.CDDASoundBuffer);
-	}
-
-	function finalize()
-	{
-		global.KAGSoundBuffer.finalize(...);
-		global.CDDASoundBuffer.finalize(...);
-	}
-}
-
 
 class BGM
 {
 	var owner; // このオブジェクトを保持する KAGWindow クラスのオブジェクト
-
-	var type = "Wave"; // BGM タイプ
-	var cdVolume = "xxxx"; // 演奏に使用する CD の ボリュームラベル
 	var doubleBuffered = true; // クロスフェードを行うか
-	var midiInitialMessage = <% %>; // MIDI 初期化メッセージ
 
 	var buf1; // バッファ 1
 	var buf2; // バッファ 2
@@ -189,25 +155,8 @@ class BGM
 	function createBuffers()
 	{
 		// バッファを作成する
-		if(type == "Wave")
-		{
-			buf1 = new KAGWaveSoundBuffer(this);
-			buf2 = new KAGWaveSoundBuffer(this) if doubleBuffered;
-		}
-		else if(type == "MIDI")
-		{
-			buf1 = new KAGMIDISoundBuffer(this);
-			buf2 = new KAGMIDISoundBuffer(this) if doubleBuffered;
-		}
-		else if(type == "CDDA")
-		{
-			buf1 = new KAGCDDASoundBuffer(this);
-			if(doubleBuffered)
-			{
-				throw new Exception("CDDA ではクロスフェードを行えません。"
-					"doubleBuffered = false に設定してください。");
-			}
-		}
+		buf1 = new KAGWaveSoundBuffer(this);
+		buf2 = new KAGWaveSoundBuffer(this) if doubleBuffered;
 		buf1.looping = looping;
 		buf2.looping = looping if buf2 !== void;
 	}
@@ -219,73 +168,27 @@ class BGM
 		invalidate buf2 if buf2 !== void;
 	}
 
-	function changeDevice(newtype)
-	{
-		// デバイスの変更 
-		var flags = %[];
-		store(flags); // いったん状態を保存
-		freeBuffers(); // バッファの解放
-		type = newtype;
-		createBuffers(); // バッファの作成
-		restore(flags); // 状態を復帰
-	}
-
 	function playBuffer(buf, storage, loop, paused = false, start)
 	{
 		// buf に対して演奏を開始させる
 
 		// 拡張子やドライブ文字が省略された場合、検索を行う
 		var found = true;
-		if(type == "CDDA")
+		var test;
+		if(!Storages.isExistentStorage(storage))
 		{
-			if(storage[1] != ':')
-			{
-				var drive = Storages.searchCD(cdVolume);
-				if(drive == '')
-				{
-					// 使用可能な CD が見つからない
-					dm("ボリュームラベル " + cdVolume + " を持った CD がドライブに入っていません");
-					return; //------
-				}
-				else
-				{
-					storage = drive + ':' + storage;
-				}
-			}
+			if(test = storage + ".wav", Storages.isExistentStorage(test))
+				storage = test;
+			else if(test = storage + ".ogg", Storages.isExistentStorage(test))
+				storage = test;
+			else if(test = storage + ".opus", Storages.isExistentStorage(test))
+				storage = test;
+			else if(test = storage + ".tcw", Storages.isExistentStorage(test))
+				storage = test;
+			else
+				found = false;
 		}
-		else if(type == "Wave")
-		{
-			var test;
-			if(!Storages.isExistentStorage(storage))
-			{
-				if(test = storage + ".wav", Storages.isExistentStorage(test))
-					storage = test;
-				else if(test = storage + ".ogg", Storages.isExistentStorage(test))
-					storage = test;
-				else if(test = storage + ".tcw", Storages.isExistentStorage(test))
-					storage = test;
-				else
-					found = false;
-			}
-		}
-		else if(type == "MIDI")
-		{
-			var test;
-			if(!Storages.isExistentStorage(storage))
-			{
-				if(test = storage + ".mid", Storages.isExistentStorage(test))
-					storage = test;
-				else if(test = storage + ".smf", Storages.isExistentStorage(test))
-					storage = test;
-				else if(test = storage + ".mdi", Storages.isExistentStorage(test))
-					storage = test;
-				else
-					found = false;
-			}
 
-			if(midiInitialMessage.length)
-				MIDISoundBuffer.midiOut(midiInitialMessage); // 初期化メッセージなど
-		}
 
 		if(_enabled)
 		{
@@ -519,10 +422,6 @@ class BGM
 
 	function setOptions(elm)
 	{
-		if(elm.device !== void)
-		{
-			changeDevice(elm.device);
-		}
 		if(elm.volume !== void)
 		{
 			setVolume(int(+elm.volume * 1000));

@@ -43,6 +43,8 @@ class SESoundBuffer extends WaveSoundBuffer
 				storage = test;
 			else if(test = storage + ".ogg", Storages.isExistentStorage(test))
 				storage = test;
+			else if(test = storage + ".opus", Storages.isExistentStorage(test))
+				storage = test;
 			else if(test = storage + ".tcw", Storages.isExistentStorage(test))
 				storage = test;
 			else

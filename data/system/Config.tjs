@@ -666,25 +666,6 @@ function MessageLayer_config()
 function BGM_config()
 {
 // BGM の設定です。
-// CD-DA, Wave, MIDI のいずれかを BGM として再生することができます。
-
-// ◆ BGM再生メディア
-// type 変数に設定する文字列で、使用するサウンドバッファを決めることができ
-// ます。
-// "Wave"  : WaveSoundBuffer ( wav等(プラグインで再生できる物も含む) )
-// "MIDI"  : MIDISoundBuffer ( mid,smf )
-// "CDDA"  : CDDASoundBuffer ( cda )
-;type = "Wave";
-
-
-// ◆ CDDA再生ボリュームラベル
-// "CDDA" を指定した場合は、cdVolume 変数に、再生する CD のボリュームラベル
-// を指定します。ボリュームシリアル番号ではありません。
-// KAG は、このボリュームラベルを持った CD の挿入された CD-ROM ドライブで
-// CD-DA を再生します。特にマシンに複数のCD-ROMドライブが装着されている場合
-// にこれを元にしてドライブの区別を行います。
-;cdVolume = "xxxx";
-
 
 // ◆ クロスフェードを行うか
 // doubleBuffered 変数には、サウンドバッファを２つ使用するかどうかを指定し
@@ -693,19 +674,6 @@ function BGM_config()
 // MIDI サウンドバッファで複数同時再生を意図していないデータを使う場合や、
 // CDDA サウンドバッファを使う場合は false に指定してください。
 ;doubleBuffered = true;
-
-
-// ◆ MIDI 再生開始前に送るメッセージ
-// MIDI データの再生を開始する前に MIDI 音源に送るメッセージです。
-// <% %> を指定すると メッセージは送られません。
-// <% f0 7e 7f 09 01 f7 ff 00 %> は GM System On です。
-// ほかに
-// <% f0 41 10 42 12 40 00 7f 00 41 f7 ff 00 %> GS reset
-// <% f0 43 10 4c 00 00 7e 00 f7 ff 00 %> XG on
-// など。
-// ff 00 を途中に挿入するとその時点で 50ms のウェイトが入ります。
-// 音源初期化などでウェイトが必要な場合に挿入します。
-;midiInitialMessage = <% f0 7e 7f 09 01 f7 ff 00 %>;
 
 
 // ◆ BGM 追加の設定
