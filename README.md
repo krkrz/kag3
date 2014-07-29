@@ -2,3 +2,6 @@
 
 β版に添付していたものを UTF-8 に変換しています。
 
+---
+Copyright (C)2001-2009, W.Dee and contributors  改変・配布は自由です
+
