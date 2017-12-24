@@ -7,8 +7,8 @@ with(Window) {
     &.innerSunken    = &_dummyProp;
     &.showScrollBars = &_dummyProp;
 }
-Plugins.link("plugin/menu.dll");
-Plugins.link("plugin/KAGParser.dll");
+Plugins.link("menu.dll");
+Plugins.link("KAGParser.dll");
 @endif
 
 // このスクリプトは一番最初に実行されるスクリプトです
